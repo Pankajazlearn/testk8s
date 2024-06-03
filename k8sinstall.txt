@@ -1,0 +1,22 @@
+curl https://releases.rancher.com/install-docker/20.10.sh | sh
+sudo apt-get update
+# apt-transport-https may be a dummy package; if so, you can skip that package
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+kubeadm init --pod-network-cidr=10.10.0.1/24
+
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml -O
+
+
+
+mv /etc/containerd/config.toml /root/config.toml.bak
+systemctl restart containerd
+
+
+kubeadm join 10.154.0.4:6443 --token l18ji6.z4whrmo8my268xm5 \
+        --discovery-token-ca-cert-hash sha256:b4409a2e90833bddbed31c11c09df9ce3747139f7dbddd65f423ae922babf5c9
